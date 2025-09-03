@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   width: 80%;
-  height: 80%;
+  height: 95%;
   margin: auto;
   background-color: #ffffff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -73,7 +73,7 @@
 
 /* ---- Table ---- */
 .data {
-  flex: 8;
+  flex: 9;
   overflow-y: auto;
 }
 .table {
@@ -100,11 +100,18 @@
   border-bottom: 1px solid #ddd;
 }
 .btnEdit {
+  display: flex;
+  align-items: center;
   background-color: transparent;
   border: none;
   padding: 10px 10px;
   border: none;
   cursor: pointer;
+}
+
+.btnEdit:hover {
+  background-color: #f2f2f2;
+  border-radius: 5px;
 }
 
 /* ---- Pages ---- */

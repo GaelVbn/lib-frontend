@@ -4,6 +4,7 @@ import styles from "./WhiteBoard.module.css";
 import { IoIosSearch } from "react-icons/io";
 import { BsThreeDots } from "react-icons/bs";
 import { backendUrl } from "../../../../backendUrl";
+import AddBook from "../AddBook/AddBook";
 
 // TS INTERFACE
 type Book = {
@@ -14,10 +15,38 @@ type Book = {
   format: string;
 };
 
+const BOOKS_PER_PAGE = 10;
+
 const WhiteBoard = () => {
   const [books, setBooks] = useState<Book[]>([]);
+  const [refresh, setRefresh] = useState<boolean>(false);
+  const [modalAddBook, setModalAddBook] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const listOfBooks = books.map((book, index) => (
+  const handleModalAddBook = () => setModalAddBook(!modalAddBook);
+  const handleRefresh: () => void = () => setRefresh((prev) => !prev);
+
+  // Fetch des livres
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await fetch(`${backendUrl}/books`);
+        const data: Book[] = await response.json();
+        setBooks(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchBooks();
+  }, [refresh]);
+
+  // Pagination calculée
+  const totalPages = Math.ceil(books.length / BOOKS_PER_PAGE);
+  const startIndex = (currentPage - 1) * BOOKS_PER_PAGE;
+  const currentBooks = books.slice(startIndex, startIndex + BOOKS_PER_PAGE);
+
+  const listOfBooks = currentBooks.map((book, index) => (
     <tr key={index}>
       <td>{book.title}</td>
       <td>{book.author_first_name}</td>
@@ -32,19 +61,40 @@ const WhiteBoard = () => {
     </tr>
   ));
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await fetch(`${backendUrl}/books`);
-        const data: Book[] = await response.json();
-        setBooks(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  // Gestion navigation
+  const goToPage = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
 
-    fetchBooks();
-  }, []);
+  const renderPageNumbers = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 2 && i <= currentPage + 2)
+      ) {
+        pages.push(
+          <li key={i}>
+            <button
+              className={i === currentPage ? styles.active : ""}
+              onClick={() => goToPage(i)}
+            >
+              {i}
+            </button>
+          </li>
+        );
+      } else if (i === currentPage - 3 || i === currentPage + 3) {
+        pages.push(
+          <li key={`dots-${i}`}>
+            <span>…</span>
+          </li>
+        );
+      }
+    }
+    return pages;
+  };
 
   return (
     <div className={styles.box}>
@@ -53,7 +103,7 @@ const WhiteBoard = () => {
           <IoIosSearch className={styles.searchIcon} size={18} />
           <input type="text" placeholder="Search" />
         </div>
-        <button>Add book</button>
+        <button onClick={handleModalAddBook}>Add book</button>
       </div>
       <div className={styles.data}>
         <table className={styles.table}>
@@ -63,7 +113,7 @@ const WhiteBoard = () => {
               <th scope="col">AUTHOR FIRSTNAME</th>
               <th scope="col">AUTHOR LASTNAME</th>
               <th scope="col">GENRE</th>
-              <th scope="col">Format</th>
+              <th scope="col">FORMAT</th>
               <th scope="col"></th>
             </tr>
           </thead>
@@ -73,32 +123,37 @@ const WhiteBoard = () => {
 
       <nav className={styles.pages} aria-label="table-de-navigation">
         <span>
-          Showing <strong>1-10</strong> of <strong>1000</strong>
+          Showing <strong>{startIndex + 1}</strong>-
+          <strong>{Math.min(startIndex + BOOKS_PER_PAGE, books.length)}</strong>{" "}
+          of <strong>{books.length}</strong>
         </span>
         <ul>
           <li>
-            <button disabled>«</button>
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              «
+            </button>
           </li>
+          {renderPageNumbers()}
           <li>
-            <button className={styles.active}>1</button>
-          </li>
-          <li>
-            <button>2</button>
-          </li>
-          <li>
-            <button>3</button>
-          </li>
-          <li>
-            <button>…</button>
-          </li>
-          <li>
-            <button>100</button>
-          </li>
-          <li>
-            <button>»</button>
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              »
+            </button>
           </li>
         </ul>
       </nav>
+
+      {modalAddBook && (
+        <AddBook
+          handleModalAddBook={handleModalAddBook}
+          handleRefresh={handleRefresh}
+        />
+      )}
     </div>
   );
 };
