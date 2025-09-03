@@ -1,9 +1,166 @@
 .box {
+  display: flex;
+  flex-direction: column;
   width: 80%;
   height: 80%;
-  display: flex;
-  place-self: center;
+  margin: auto;
   background-color: #ffffff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
+}
+
+/* ---- Actions ---- */
+.actions {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.actions input {
+  width: 40%;
+  height: 60%;
+  place-self: center;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-left: 15px;
+  padding: 10px;
+  font-family: "Inter", sans-serif;
+}
+
+.actions button {
+  width: 10%;
+  height: 60%;
+  place-self: center;
+  border-radius: 5px;
+  border: none;
+  margin-right: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #1c4fd9;
+  color: white;
+  font-family: "Inter", sans-serif;
+}
+
+.actions button:hover {
+  background-color: #163da8;
+}
+.searchBox {
+  display: flex;
+  align-items: center;
+  width: 40%;
+  height: 60%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0 10px;
+  background: white;
+  place-self: center;
+  font-family: "Inter", sans-serif;
+  margin-left: 15px;
+}
+
+.searchBox input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 10px;
+}
+
+.searchIcon {
+  color: #888;
+  margin-right: 5px;
+}
+
+/* ---- Table ---- */
+.data {
+  flex: 8;
+  overflow-y: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+}
+
+.table thead {
+  background-color: #f8fbfa;
+  font-family: "Inter", sans-serif;
+}
+
+.table th,
+.table td {
+  font-family: "Inter", sans-serif;
+  padding: 12px 15px;
+  border: 0px solid #ddd;
+  color: #626d75;
+  font-size: small;
+}
+.table tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+.btnEdit {
+  background-color: transparent;
+  border: none;
+  padding: 10px 10px;
+  border: none;
+  cursor: pointer;
+}
+
+/* ---- Pages ---- */
+/* .pages {
+  flex: 1;
+  margin-top: 20px;
+  text-align: center;
+  color: #444;
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  background-color: #ccc;
+} */
+.pages {
+  flex: 1;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #444;
+  font-family: "Inter", sans-serif;
+}
+
+.pages span {
+  margin-left: 15px;
+}
+
+.pages ul {
+  display: flex;
+  list-style: none;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  margin-right: 15px;
+}
+
+.pages li button {
+  border: 1px solid #ddd;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pages li button:hover:not(:disabled) {
+  background: #f2f2f2;
+}
+
+.pages li button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pages .active {
+  background: #1c4fd9;
+  color: white;
+  border-color: #1c4fd9;
 }
