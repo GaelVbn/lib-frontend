@@ -5,14 +5,22 @@ import { IoIosSearch } from "react-icons/io";
 import { BsThreeDots } from "react-icons/bs";
 import { backendUrl } from "../../../../backendUrl";
 import AddBook from "../AddBook/AddBook";
+import EditBtn from "../EditBtn/EditBtn";
+import Preview from "../Preview/Preview";
+import EditBookModal from "../EditBookModal/EditBookModal";
 
 // TS INTERFACE
 type Book = {
+  book_id: number;
   title: string;
   author_first_name: string;
   author_last_name: string;
   genre: string;
   format: string;
+  publication_year: number;
+  isbn: any;
+  coffee_shop_name: string;
+  coffee_shop_address: string;
 };
 
 const BOOKS_PER_PAGE = 10;
@@ -21,10 +29,20 @@ const WhiteBoard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [modalAddBook, setModalAddBook] = useState<boolean>(false);
+  const [previewBook, setPreviewBook] = useState<Book | null>(null);
+  const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(
+    null
+  );
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [editBook, setEditBook] = useState<Book | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
+  const handleEditBook = (book: Book) => setEditBook(book);
+  const closeEditModal = () => setEditBook(null);
   const handleModalAddBook = () => setModalAddBook(!modalAddBook);
-  const handleRefresh: () => void = () => setRefresh((prev) => !prev);
+  const handleModalEditBtn = (index: number) =>
+    setOpenDropdownIndex((prev) => (prev === index ? null : index));
+  const handleRefresh = () => setRefresh((prev) => !prev);
 
   // Fetch des livres
   useEffect(() => {
@@ -37,26 +55,57 @@ const WhiteBoard = () => {
         console.error(err);
       }
     };
-
     fetchBooks();
   }, [refresh]);
 
-  // Pagination calculée
-  const totalPages = Math.ceil(books.length / BOOKS_PER_PAGE);
+  // Reset page à 1 lorsque la recherche change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // Filtrer les livres selon la recherche
+  const filteredBooks = books.filter(
+    (book) =>
+      book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      book.author_first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      book.author_last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (book.genre &&
+        book.genre.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (book.format &&
+        book.format.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  // Pagination
+  const totalPages = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE);
   const startIndex = (currentPage - 1) * BOOKS_PER_PAGE;
-  const currentBooks = books.slice(startIndex, startIndex + BOOKS_PER_PAGE);
+  const currentBooks = filteredBooks.slice(
+    startIndex,
+    startIndex + BOOKS_PER_PAGE
+  );
 
   const listOfBooks = currentBooks.map((book, index) => (
-    <tr key={index}>
+    <tr key={book.book_id}>
       <td>{book.title}</td>
       <td>{book.author_first_name}</td>
       <td>{book.author_last_name}</td>
       <td>{book.genre}</td>
       <td>{book.format}</td>
-      <td>
-        <button className={styles.btnEdit}>
+      <td style={{ position: "relative" }}>
+        <button
+          className={styles.btnEdit}
+          onClick={() => handleModalEditBtn(index)}
+        >
           <BsThreeDots size={15} />
         </button>
+        {openDropdownIndex === index && (
+          <EditBtn
+            handleModalEditBtn={() => handleModalEditBtn(index)}
+            bookId={book.book_id}
+            handleRefresh={handleRefresh}
+            onPreview={() => setPreviewBook(book)}
+            handleEditBook={() => handleEditBook(book)}
+          />
+        )}
       </td>
     </tr>
   ));
@@ -101,10 +150,16 @@ const WhiteBoard = () => {
       <div className={styles.actions}>
         <div className={styles.searchBox}>
           <IoIosSearch className={styles.searchIcon} size={18} />
-          <input type="text" placeholder="Search" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         <button onClick={handleModalAddBook}>Add book</button>
       </div>
+
       <div className={styles.data}>
         <table className={styles.table}>
           <thead>
@@ -124,8 +179,10 @@ const WhiteBoard = () => {
       <nav className={styles.pages} aria-label="table-de-navigation">
         <span>
           Showing <strong>{startIndex + 1}</strong>-
-          <strong>{Math.min(startIndex + BOOKS_PER_PAGE, books.length)}</strong>{" "}
-          of <strong>{books.length}</strong>
+          <strong>
+            {Math.min(startIndex + BOOKS_PER_PAGE, filteredBooks.length)}
+          </strong>
+          of <strong>{filteredBooks.length}</strong>
         </span>
         <ul>
           <li>
@@ -151,6 +208,21 @@ const WhiteBoard = () => {
       {modalAddBook && (
         <AddBook
           handleModalAddBook={handleModalAddBook}
+          handleRefresh={handleRefresh}
+        />
+      )}
+
+      {previewBook && (
+        <Preview
+          book={previewBook}
+          handlePreviewBook={() => setPreviewBook(null)}
+        />
+      )}
+
+      {editBook && (
+        <EditBookModal
+          book={editBook}
+          handleClose={closeEditModal}
           handleRefresh={handleRefresh}
         />
       )}
